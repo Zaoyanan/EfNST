@@ -19,4 +19,4 @@ Fig. 1. Workflow of the EfNST. (a) The input ST data are Gene Expression, Histol
 - networkx=2.7
 - scipy=1.8.0
 ## Tutorial
-Check the Tutorial folder for detailed instructions.
+Check the Tutorial folder for detailed instruction.
