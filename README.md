@@ -4,5 +4,7 @@ Spatial Transcriptomics (ST) leverages Gene Expression Profiling while preservin
 ![image](https://github.com/Zaoyanan/EfNST/blob/main/figure/Overview.png)
 Fig. 1. Workflow of the EfNST. (a) The input ST data are Gene Expression, Histological Images and Spatial Location; (b) EfNST processed the H&E Images and Spatial Locations to obtain Image Patches, which were processed using a pre-trained EfficientNet network to obtain Image Feature Matrix. Data Augmentation is performed for each spot based on the similarity of spots in spatial combined with the gene expression weights and the spatial location weights; (c) Final latent embedding is achieved using VGAE and DAE, H1 represtents Hidden layer, H2 represtents Low dimensional representation; (d) Latent representations can be used to perform Downstream Analysis.
 ## Dependencies
-
+- Python=3.9.16
+- 
 ## Tutorial
+Check the Tutorial folder for detailed instructions.
