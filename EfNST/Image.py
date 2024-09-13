@@ -49,8 +49,7 @@ class Image_Feature:
         else:
             raise ValueError(f"{self.cnnType} is not a valid EfficientNet type.")
         return cnn_pretrained_model
-    def Extract_Image_Feature(self,):
-    
+    def Extract_Image_Feature(self,):    
         transform_list = [transforms.ToTensor(),
                           transforms.Normalize(mean=[0.485, 0.456, 0.406], 
                           std =[0.229, 0.224, 0.225]),
@@ -62,16 +61,10 @@ class Image_Feature:
                           transforms.RandomAffine(45, translate=(0.3, 0.3), scale=(0.8, 1.2), shear=(-0.3, 0.3, -0.3, 0.3)),
                           transforms.RandomErasing()
                           ]
-        # transform_list = [transforms.ToTensor(),
-        #                   transforms.Normalize(mean=[0.54, 0.51, 0.68], 
-        #                   std =[0.25, 0.21, 0.16])]
         img_to_tensor = transforms.Compose(transform_list)
-
         feat_df = pd.DataFrame()
         model = self.efficientNet_model()
-        #model.fc = torch.nn.LeakyReLU(0.1)
         model.eval()
-
         if "slices_path" not in self.adata.obs.keys():
              raise ValueError("Please run the function image_crop first")        
         for spot, slice_path in self.adata.obs['slices_path'].items():
@@ -95,7 +88,6 @@ class Image_Feature:
         if self.verbose:
             print("The pca result of image feature is added to adata.obsm['image_feat_pca'] !")
         return self.adata 
-
 def image_crop(
         adata,
         save_path,
@@ -107,14 +99,12 @@ def image_crop(
     if library_id is None:
        library_id = list(adata.uns["spatial"].keys())[0]
        adata.uns["spatial"][library_id]["use_quality"] = quality
-
     image = adata.uns["spatial"][library_id]["images"][
             adata.uns["spatial"][library_id]["use_quality"]]
     if image.dtype == np.float32 or image.dtype == np.float64:
         image = (image * 255).astype(np.uint8)
     img_pillow = Image.fromarray(image)
     tile_names = []
-
     with tqdm(total=len(adata),
               desc="Tiling image",
               bar_format="{l_bar}{bar} [ time left: {remaining} ]") as pbar:
@@ -136,7 +126,6 @@ def image_crop(
                         str(imagecol), str(imagerow)))
             tile.save(out_tile, "PNG")
             pbar.update(1)
-
     adata.obs["slices_path"] = tile_names
     if verbose:
         print("The slice path of image feature is added to adata.obs['slices_path'] !")
