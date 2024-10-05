@@ -12,7 +12,7 @@ data_path = "C:/Users/lenovo/Desktop"
 #data_path = "D:/科研/ST数据/DLPFC12切片"
 save_path = "C:/Users/lenovo/Desktop/1515" #### save path
 #data_name="V1_Breast_Cancer_Block_A_Section_1"
-data_name="151510"
+data_name="151670"
 quality='hires'
 n_domains=5
 EfNST= run(save_path = save_path,platform = "Visium",pca_n_comps = 200,pre_epochs = 800, #### According to your own hardware, choose the number of training
