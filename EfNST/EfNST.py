@@ -198,61 +198,9 @@ class InnerProductDecoder(nn.Module):
         z = F.dropout(z, self.dropout, training=self.training)
         adj = self.act(torch.mm(z, z.t()))
         return adj
-
 class GradientReverseLayer(torch.autograd.Function):
     def forward(ctx, x, weight):
         ctx.weight = weight
         return x.view_as(x) * 1.0
     def backward(ctx, grad_output):
         return (grad_output * -1 * ctx.weight), None
-
-class AdversarialNetwork(nn.Module):
-    def __init__(self, model, n_domains: int = 2, weight: float = 1, n_layers: int = 2,)-> None:
-        super(AdversarialNetwork, self).__init__()
-        self.model = model
-        self.n_domains = n_domains
-        self.n_layers = n_layers
-        self.weight = weight
-
-        hidden_layers = [
-            nn.Linear(self.model.linear_encoder_hidden[-1] + self.model.conv_hidden[-1],
-                      self.model.linear_encoder_hidden[-1] + self.model.conv_hidden[-1]),
-            nn.ReLU(),
-        ] * n_layers
-
-        self.domain_clf = nn.Sequential(
-            *hidden_layers,
-            nn.Linear(self.model.linear_encoder_hidden[-1] + self.model.conv_hidden[-1], self.n_domains),
-        )
-        return
-    def set_rev_grad_weight(self, weight: float) -> None:
-        self.weight = weight
-        return
-
-    def target_distribution(self, target):
-        weight = (target ** 2) / torch.sum(target, 0)
-        return (weight.t() / torch.sum(weight, 1)).t()
-
-    def EfNST_loss(
-        self, decoded, x, preds, labels, mu, logvar, n_nodes, norm, mask=None, MSE_WT=10, KLD_WT=0.1
-    ):
-        mse_fun = torch.nn.MSELoss()
-        mse_loss = mse_fun(decoded, x)
-
-        if mask is not None:
-            preds = preds * mask
-            labels = labels * mask
-
-        bce_logits_loss = norm * F.binary_cross_entropy_with_logits(preds, labels)
-
-        KLD = -0.5 / n_nodes * torch.mean(
-            torch.sum(1 + 2 * logvar - mu.pow(2) - logvar.exp().pow(2), 1)
-        )
-
-        return MSE_WT * mse_loss + bce_logits_loss + KLD_WT * KLD
-
-    def forward(self, x: torch.FloatTensor, edge_index) -> torch.FloatTensor:
-        z, mu, logvar, de_feat, q, feat_x, gnn_z = self.model(x, edge_index)
-        x_rev = GradientReverseLayer.apply(z, self.weight)
-        domain_pred = self.domain_clf(x_rev)
-        return z, mu, logvar, de_feat, q, feat_x, gnn_z, domain_pred
