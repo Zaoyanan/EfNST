@@ -66,7 +66,7 @@ class run():
 		graph_dict = graph(data, distType=distType, k=k, rad_cutoff=rad_cutoff).main()
 		print("Step 2: Graph computing!")
 		return graph_dict 
-	def _get_augment(self,adata,Adj_WT = 0.3,neighbour_k = 4,weights = "weights_matrix_all",spatial_k = 30,):
+	def _get_augment(self,adata,Adj_WT = 0.2,neighbour_k = 4,weights = "weights_matrix_all",spatial_k = 30,):
 		adata_augment = augment_adata(adata, 
 								Adj_WT = Adj_WT,
 								neighbour_k = neighbour_k,
@@ -89,7 +89,7 @@ class run():
 		cl_opt_df = pd.DataFrame({"resolution": resolutions, "score": scores})    
 		best_resolution = cl_opt_df.loc[cl_opt_df["score"].idxmax(), "resolution"]    
 		return best_resolution
-	def _priori_cluster(self,adata,n_domains=7,):
+	def _priori_cluster(self,adata,n_domains=7):
 		for res in sorted(list(np.arange(0.1, 2.5, 0.01)), reverse=True):
 			sc.tl.leiden(adata, random_state=0, resolution=res)
 			count_unique_leiden = len(pd.DataFrame(adata.obs['leiden']).leiden.unique())
@@ -97,7 +97,7 @@ class run():
 				break
 		return res   
 	def _get__dataset_adata(self,data_path,data_name,character="spatial",
-                         verbose=False,Adj_WT=0.3,neighbour_k=4,
+                         verbose=False,Adj_WT=0.2,neighbour_k=4,
                          weights="weights_matrix_all",spatial_k=30,
                          distType="Radius",k=12,rad_cutoff=150,):
 		adata = self._get_adata(data_path=data_path, data_name=data_name, verbose=verbose)
@@ -143,14 +143,6 @@ class run():
                                    KL_WT=self.KL_WT,MSE_WT=self.MSE_WT,
                                    KLD_WT=self.KLD_WT,Domain_WT=self.Domain_WT,
                                    use_gpu=self.use_gpu,)
-		else:
-			EfNST_adversial_model = AdversarialNetwork(
-			model=EfNST_model, n_domains=int(len(self.data_name))
-			)
-			EfNST_training = TrainingConfig(concat_X,graph_dict,EfNST_adversial_model,
-                                   pre_epochs=self.pre_epochs,epochs=self.epochs,KL_WT=self.KL_WT,
-                                   MSE_WT=self.MSE_WT,KLD_WT=self.KLD_WT,
-                                   Domain_WT=self.Domain_WT,domains=domains,use_gpu=self.use_gpu,)
 		if pretrain:
 			EfNST_training.fit()
 		else:
